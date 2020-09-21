@@ -1,8 +1,5 @@
 package Model
 
-
-import scala.language.higherKinds
-
 import slick.jdbc.PostgresProfile.api._
 
 case class Clients(tag: Tag) extends Table[ClientDataModel](tag, "CLIENTS") {

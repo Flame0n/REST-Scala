@@ -9,6 +9,5 @@ case class ClientDataModel(id: Long = 0, firstName: String, lastName: String, bi
 
   override def toString: String = id + " " + firstName + " " + lastName + " " + birthDate + " " + address + " "
 
-
 }
 

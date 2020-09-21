@@ -1,4 +1,6 @@
-import Model.{ClientDataModel, DatabaseManager, MyListener}
+package Controller
+
+import Model.{DatabaseManager, MyListener}
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
@@ -19,7 +21,7 @@ object HttpServer {
 
     val route = {
       concat(
-        (get & pathPrefix("web")) {
+        (get & pathPrefix("")) {
           (pathEndOrSingleSlash & redirectToTrailingSlashIfMissing(StatusCodes.TemporaryRedirect)) {
             getFromResource("web/index.html")
           } ~ {
@@ -40,7 +42,7 @@ object HttpServer {
 
     val bindingFuture = Http().newServerAt("localhost", 8080).bind(route)
 
-    println(s"Server online at http://localhost:8080/web\nPress RETURN to stop...")
+    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
     StdIn.readLine()
     bindingFuture
       .flatMap(_.unbind())

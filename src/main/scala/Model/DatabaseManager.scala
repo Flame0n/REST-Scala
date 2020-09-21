@@ -51,11 +51,6 @@ class DatabaseManager {
       case (client: ClientDataModel) =>
         println(client)
     })
-
-    f.onComplete {
-      case Success(s) => println(s"Result: Success")
-      case Failure(t) => t.printStackTrace()
-    }
   }
 
   def listOfTableElements(listener: MyListener) = {
