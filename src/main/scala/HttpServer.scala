@@ -1,71 +1,55 @@
-import java.io.PrintWriter
-
-import Model.{ClientDataModel, DatabaseManager}
+import Model.{ClientDataModel, DatabaseManager, MyListener}
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
-import akka.protobufv3.internal.compiler.PluginProtos.CodeGeneratorResponse.File
-import javax.swing.text.html.HTML
 
-import scala.io.Source
 import scala.io.StdIn
+import scala.util.Success
 
-object HttpServerRoutingMinimal {
+object HttpServer {
 
   def main(): Unit = {
 
     implicit val system = ActorSystem(Behaviors.empty, "my-system")
     implicit val executionContext = system.executionContext
 
-    def getHomePageHtml: String = {
-      var s: String = ""
+    lazy val db = new DatabaseManager
 
-      var src = Source.fromFile("src\\main\\scala\\HomePage.html").getLines()
+    val route = {
+      concat(
+        (get & pathPrefix("web")) {
+          (pathEndOrSingleSlash & redirectToTrailingSlashIfMissing(StatusCodes.TemporaryRedirect)) {
+            getFromResource("web/index.html")
+          } ~ {
+            getFromResourceDirectory("web")
+          }
+        }, path("table") {
 
-      for (i <- src) {
-        s += i
-      }
+          val listener = new MyListener {
+            override def success(s: String): Unit = println("")
+          }
 
-      return s
+          onComplete(db.listOfTableElements(listener)) {
+            case Success(value) => complete(s"The result was $value")
+          }
+
+        })
     }
-
-    val route =
-      path("") {
-        get {
-
-          complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, getHomePageHtml))
-        }
-      }
 
     val bindingFuture = Http().newServerAt("localhost", 8080).bind(route)
 
-    println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
+    println(s"Server online at http://localhost:8080/web\nPress RETURN to stop...")
     StdIn.readLine()
     bindingFuture
       .flatMap(_.unbind())
       .onComplete(_ => system.terminate())
   }
 
-
 }
 
 object Main extends App {
-
-
-  val db = new DatabaseManager
-
-  db.incert(ClientDataModel(10,firstName = "asd", lastName = "sdf", address = "asdasdasd", birthDate = "asdasdasd"))
-  db.showTable
-
-  db.deleteById(10)
-
-  //Thread.sleep(1)
-
-  db.showTable
-
-  HttpServerRoutingMinimal.main()
-
-
+  HttpServer.main()
 }
+
