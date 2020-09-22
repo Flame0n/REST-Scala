@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="css/styles.css">
     <title>Title</title>
 </head>
-<body>
-<script src="js/tableCreate.js"></script>
 
-<script src="js/tableGet.js"></script>
-<p>sometext</p>
+<body>
+
+    <div class="controls">
+        <button id="refreshButton">refresh</button>
+        <button id="addButton">add</button>
+        <button id="updateButton">update</button>
+        <button id="deleteButton">delete</button>
+    </div>
+    <script src="js/fillTable.js"></script>
+    <script src="js/getClientsJson.js"></script>
+    <script src="js/userInputs.js"></script>
+    <script src="js/postData.js"></script>
+
+    <table id="clientsTable">
+
+    </table>
 </body>
+
 </html>

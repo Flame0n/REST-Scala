@@ -1,6 +1,7 @@
 package Controller
 
-import Model.{DatabaseManager, MyListener}
+import Controller.JsonHandler.createJson
+import Model.{ClientData, DatabaseManager, MyListener}
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
@@ -10,9 +11,9 @@ import akka.http.scaladsl.server.Directives._
 import scala.io.StdIn
 import scala.util.Success
 
-object HttpServer {
+object Server {
 
-  def main(): Unit = {
+  def start(): Unit = {
 
     implicit val system = ActorSystem(Behaviors.empty, "my-system")
     implicit val executionContext = system.executionContext
@@ -27,17 +28,22 @@ object HttpServer {
           } ~ {
             getFromResourceDirectory("web")
           }
-        }, path("table") {
+        },
+        path("table") {
+          concat (get {
+            val listener = new MyListener {
+              override def success(s: String): Unit = println("")
+            }
 
-          val listener = new MyListener {
-            override def success(s: String): Unit = println("")
-          }
-
-          onComplete(db.listOfTableElements(listener)) {
-            case Success(value) => complete(s"The result was $value")
-          }
-
+            onComplete(db.listOfTableElements(listener)) {
+              case Success( value) => complete(s" ${createJson(value)}")
+            }
+          },
+          post{
+            complete("asd")
+          })
         })
+
     }
 
     val bindingFuture = Http().newServerAt("localhost", 8080).bind(route)
@@ -52,6 +58,6 @@ object HttpServer {
 }
 
 object Main extends App {
-  HttpServer.main()
+  Server.start()
 }
 

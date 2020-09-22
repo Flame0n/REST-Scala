@@ -20,9 +20,9 @@ class DatabaseManager {
   val db = Database.forURL(url, user = user, password = password, driver = driver)
 
 
-  val clients = TableQuery[Clients]
+  val clients = TableQuery[ClientsQuery]
 
-  def incert(client: ClientDataModel): Unit = {
+  def incert(client: ClientData): Unit = {
     val userId = (clients returning clients.map(_.id)) += client
     val f = db.run(userId)
     f.onComplete {
@@ -48,14 +48,14 @@ class DatabaseManager {
 
   def showTable: Unit = {
     val f = db.run(clients.result).map(_.foreach {
-      case (client: ClientDataModel) =>
+      case (client: ClientData) =>
         println(client)
     })
   }
 
   def listOfTableElements(listener: MyListener) = {
 
-    val f: Future[Seq[ClientDataModel]] = db.run(clients.result)
+    val f: Future[Seq[ClientData]] = db.run(clients.result)
 
     f
   }
